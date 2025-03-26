@@ -1,11 +1,12 @@
-import {View, Text, Image, ScrollView} from 'react-native';
-import React from 'react';
+import {View, Text, Image, ScrollView, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import tw from 'twrnc';
 import {Fonts} from '../constants/font';
 import {BarChart} from 'react-native-chart-kit';
 import {CommentIcon, HeartIcon, SendIcon} from '../../assets/icons';
 import {Post} from '../types';
 import useColors from '../zustand/useColor';
+import {formatDate} from '../constants/date';
 
 type Props = {
   item: Post;
@@ -19,6 +20,14 @@ type Props = {
 
 const PostComponent = (props: Props) => {
   const colors = useColors();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    if (props.item.caption.length > 84) {
+      setIsTruncated(true);
+    }
+  }, [props.item.caption]);
 
   return (
     <View
@@ -27,7 +36,7 @@ const PostComponent = (props: Props) => {
         {backgroundColor: colors.secondary},
       ]}>
       <View style={tw`flex-row items-center py-3 px-3`}>
-        {props.item.user.image_url === 'Unknown' ? (
+        {!props.item.user.image_url.startsWith('http') ? (
           <Image
             source={require('../../assets/images/default_profile.jpg')}
             style={tw`w-10 h-10 rounded-full`}
@@ -39,9 +48,22 @@ const PostComponent = (props: Props) => {
           />
         )}
         <View style={tw`px-2`} />
-        <Text style={[tw``, {fontFamily: Fonts.semiBold}]}>
-          {props.item.user.name}
-        </Text>
+        <View>
+          <Text style={[tw``, {fontFamily: Fonts.semiBold}]}>
+            {props.item.user.name}
+          </Text>
+          <Text
+            style={[
+              tw``,
+              styles.text,
+              {
+                fontFamily: Fonts.regular,
+                color: colors.placeholder,
+              },
+            ]}>
+            Posted {formatDate(props.item.created_at)}
+          </Text>
+        </View>
       </View>
       <View
         style={[
@@ -72,6 +94,37 @@ const PostComponent = (props: Props) => {
         <Text style={[tw`px-4`, {fontFamily: Fonts.regular}]}>
           {props.item.device_usage}
         </Text>
+        {props.item.caption !== '' && (
+          <View>
+            <View style={tw`py-1`} />
+            <View
+              style={[
+                tw`h-0.3 rounded-full mx-4 items-center justify-center`,
+                {backgroundColor: colors.placeholder},
+              ]}
+            />
+            <View style={tw`py-1`} />
+            <Text
+              numberOfLines={isExpanded ? undefined : 2}
+              ellipsizeMode="tail"
+              style={[
+                tw`px-4 text-xs text-justify`,
+                {fontFamily: Fonts.regular},
+              ]}>
+              {props.item.caption}
+            </Text>
+            {!isExpanded && isTruncated && (
+              <Text
+                onPress={() => setIsExpanded(true)}
+                style={[
+                  tw`px-4 text-xs`,
+                  {fontFamily: Fonts.semiBold, color: colors.primary},
+                ]}>
+                Read more
+              </Text>
+            )}
+          </View>
+        )}
         <View style={tw`py-2`} />
         <View
           style={[
@@ -99,3 +152,9 @@ const PostComponent = (props: Props) => {
 };
 
 export default PostComponent;
+
+export const styles = StyleSheet.create({
+  text: {
+    fontSize: 10,
+  },
+});
