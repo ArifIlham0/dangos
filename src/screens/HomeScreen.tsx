@@ -5,30 +5,34 @@ import {
   StatusBar,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator,
   FlatList,
+  RefreshControl,
+  ScrollView,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import tw from 'twrnc';
-import useThemeStore from '../zustand/themeStore';
-import COLORS from '../constants/color';
 import {Fonts} from '../constants/font';
 import {PersonIcon} from '../../assets/icons';
 import usePostStore from '../zustand/postStore';
-import {PostComponent} from '../components';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {NoDataComponent, PostComponent} from '../components';
+import useColors from '../zustand/useColor';
 
 const HomeScreen = () => {
   const statusBarHeight =
     Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 50;
-  const {isDarkMode} = useThemeStore();
-  const colors = COLORS(isDarkMode);
-  const {isLoading, posts, fetchPosts} = usePostStore();
+  const colors = useColors();
+  const {isLoadingPost, posts, fetchPosts} = usePostStore();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    // await AsyncStorage.setItem("uuid", );
     fetchPosts();
   }, [fetchPosts]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
 
   return (
     <View
@@ -47,44 +51,47 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
       <View style={tw`py-1`} />
-      <FlatList
-        data={posts}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={tw`pt-6 pb-30`}
-        renderItem={({item, index}) => {
-          const barWidth = 50;
-          const chartWidth = Math.max(
-            item.apps.length * barWidth,
-            Dimensions.get('window').width - 60,
-          );
-          const chartData = {
-            labels: item.apps.map(value => value.name),
-            datasets: [{data: item.apps.map(value => value.duration)}],
-          };
-          return (
-            <PostComponent
-              item={item}
-              index={index}
-              chartData={chartData}
-              chartWidth={chartWidth}
-            />
-          );
-        }}
-      />
-      {isLoading && (
-        <View
-          style={[
-            tw`absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900 bg-opacity-50`,
-          ]}>
-          <View
-            style={[
-              tw`py-6 px-9 rounded-lg`,
-              {backgroundColor: colors.background},
-            ]}>
-            <ActivityIndicator size="large" color={colors.primary} />
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+          />
+        }>
+        <FlatList
+          data={posts}
+          keyExtractor={item => item.id.toString()}
+          overScrollMode="never"
+          scrollEnabled={false}
+          bounces={true}
+          contentContainerStyle={tw`pt-6 pb-30`}
+          renderItem={({item, index}) => {
+            const barWidth = 50;
+            const chartWidth = Math.max(
+              item.apps.length * barWidth,
+              Dimensions.get('window').width - 60,
+            );
+            const chartData = {
+              labels: item.apps.map(value => value.name),
+              datasets: [{data: item.apps.map(value => value.duration)}],
+            };
+            return (
+              <PostComponent
+                item={item}
+                index={index}
+                chartData={chartData}
+                chartWidth={chartWidth}
+              />
+            );
+          }}
+        />
+        {posts.length === 0 && !isLoadingPost && (
+          <View style={tw`pt-20`}>
+            <NoDataComponent text="No post found" />
           </View>
-        </View>
-      )}
+        )}
+      </ScrollView>
     </View>
   );
 };

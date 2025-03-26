@@ -1,15 +1,21 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {View} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BlurView} from '@react-native-community/blur';
 import tw from 'twrnc';
-import COLORS from './constants/color';
-import useThemeStore from './zustand/themeStore';
 import {CreatePostScreen, HomeScreen, MyPostScreen} from './screens';
-import {CustomFloatingButton} from './components';
 import {TabProps} from './types';
+import usePostStore from './zustand/postStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import useUserStore from './zustand/userStore';
 import {HomeIcon, PlusIcon, PostIcon} from '../assets/icons';
+import useColors from './zustand/useColor';
+import {
+  CustomFloatingButton,
+  CustomLoading,
+  UserCreateModal,
+} from './components';
 import {
   NavigationContainer,
   NavigationProp,
@@ -39,11 +45,29 @@ const HomeTabIcon = (props: TabProps) => (
 
 const CreateTabButton = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const handlePress = async () => {
+    const storedUuid = await AsyncStorage.getItem('uuid');
+    if (!storedUuid) {
+      setModalVisible(true);
+    } else {
+      navigation.navigate('CreatePost');
+    }
+  };
 
   return (
-    <CustomFloatingButton onPress={() => navigation.navigate('CreatePost')}>
-      <PlusIcon />
-    </CustomFloatingButton>
+    <View>
+      <CustomFloatingButton onPress={handlePress}>
+        <PlusIcon />
+      </CustomFloatingButton>
+      {isModalVisible && (
+        <UserCreateModal
+          isModalVisible={isModalVisible}
+          setModalVisible={setModalVisible}
+        />
+      )}
+    </View>
   );
 };
 
@@ -65,8 +89,9 @@ const MyPostTabIcon = (props: TabProps) => (
 );
 
 const BottomTabNavigator: React.FC = () => {
-  const {isDarkMode} = useThemeStore();
-  const colors = COLORS(isDarkMode);
+  const colors = useColors();
+  const {isLoadingPost} = usePostStore();
+  const {isLoadingUser} = useUserStore();
 
   const renderHomeTabIcon = useCallback(
     (props: {focused: boolean; color: string; size: number}) => (
@@ -141,6 +166,7 @@ const BottomTabNavigator: React.FC = () => {
         blurAmount={5}
         style={tw`w-full h-20 absolute bottom-0 items-center z-1`}
       />
+      {(isLoadingPost || isLoadingUser) && <CustomLoading />}
     </View>
   );
 };

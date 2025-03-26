@@ -34,4 +34,11 @@ type Post = {
   created_at: string;
 };
 
-export type {TabProps, ThemeState, User, AppUsage, Post};
+type CreatePost = {
+  user: string;
+  caption: string;
+  apps: AppUsage[];
+  is_week: boolean;
+};
+
+export type {TabProps, ThemeState, User, AppUsage, Post, CreatePost};

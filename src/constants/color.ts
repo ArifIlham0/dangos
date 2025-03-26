@@ -6,6 +6,8 @@ const COLORS = (isDarkMode: boolean) => ({
   icon: '#28303F',
   tabBar: '#5790DF',
   tabBarOpacity: 'rgba(87, 144, 223, 0.6)',
+  bgModal: 'rgba(0, 0, 0, 0.5)',
+  placeholder: 'rgba(108, 122, 156, 0.6)',
   error: '#fa9d9d',
   success: '#97F7DF',
   white: '#FFFFFF',

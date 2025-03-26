@@ -1,12 +1,11 @@
 import {View, Text, Image, ScrollView} from 'react-native';
 import React from 'react';
 import tw from 'twrnc';
-import useThemeStore from '../zustand/themeStore';
-import COLORS from '../constants/color';
 import {Fonts} from '../constants/font';
 import {BarChart} from 'react-native-chart-kit';
 import {CommentIcon, HeartIcon, SendIcon} from '../../assets/icons';
 import {Post} from '../types';
+import useColors from '../zustand/useColor';
 
 type Props = {
   item: Post;
@@ -19,8 +18,7 @@ type Props = {
 };
 
 const PostComponent = (props: Props) => {
-  const {isDarkMode} = useThemeStore();
-  const colors = COLORS(isDarkMode);
+  const colors = useColors();
 
   return (
     <View

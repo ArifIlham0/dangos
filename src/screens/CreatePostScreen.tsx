@@ -1,26 +1,49 @@
-import {View, Text, Modal, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '../constants/font';
 import tw from 'twrnc';
-import useThemeStore from '../zustand/themeStore';
-import COLORS from '../constants/color';
-import {CrossIcon} from '../../assets/icons';
-import {Dropdown} from 'react-native-element-dropdown';
+import {CrossIcon, SendIconWhite} from '../../assets/icons';
+import {CreatePostForm, CustomLoading} from '../components';
+import {Alert} from 'react-native';
+import usePostStore from '../zustand/postStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import useColors from '../zustand/useColor';
 
-type Props = {};
-
-const data = [
-  {label: '1 Day', value: 'day'},
-  {label: '1 Week', value: 'week'},
-];
-
-const CreatePostScreen = (props: Props) => {
+const CreatePostScreen = () => {
   const navigation = useNavigation();
-  const {isDarkMode} = useThemeStore();
-  const colors = COLORS(isDarkMode);
-  const [value, setValue] = useState(null);
+  const colors = useColors();
+  const {isLoadingPost, succMessage, errMessage, createPost} = usePostStore();
+  const [value, setValue] = useState<string | null>(null);
   const [isFocus, setIsFocus] = useState(false);
+  const [hours, setHours] = useState('');
+  const [minutes, setMinutes] = useState('');
+  const [caption, setCaption] = useState('');
+
+  const handleCreatePost = async () => {
+    const uuid = await AsyncStorage.getItem('uuid');
+    if (!uuid) {
+      Alert.alert('Failed', 'User ID is required');
+      return;
+    }
+    if (!hours || !minutes) {
+      Alert.alert('Failed', 'Hours and minutes are required');
+      return;
+    }
+    await createPost({
+      user: uuid,
+      caption: caption,
+      is_week: value === 'week' ? true : false,
+      apps: [],
+    });
+  };
 
   return (
     <Modal
@@ -28,111 +51,63 @@ const CreatePostScreen = (props: Props) => {
       onRequestClose={() => navigation.goBack()}
       animationType="slide"
       presentationStyle="pageSheet">
-      <View
-        style={[tw`flex-1 items-center`, {backgroundColor: colors.background}]}>
-        <View
-          style={tw`flex-row items-center justify-between pt-4 w-full px-5`}>
-          <Text style={[tw`text-lg`, {fontFamily: Fonts.semiBold}]}>
-            Create Post
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={[
-              tw`px-2.2 py-2 rounded-full`,
-              {backgroundColor: colors.primary},
-            ]}>
-            <CrossIcon />
-          </TouchableOpacity>
-        </View>
-        <View style={tw`py-2`} />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View
           style={[
-            tw`flex-1 w-full h-full rounded-tl-3xl rounded-tr-3xl px-5`,
-            {backgroundColor: colors.secondary},
+            tw`flex-1 items-center`,
+            {backgroundColor: colors.background},
           ]}>
-          <View style={tw`py-2`} />
-          <Text style={[tw`text-center`, {fontFamily: Fonts.semiBold}]}>
-            Show your screen time!
-          </Text>
-          <View style={tw`py-4`} />
-          <Text style={[tw`text-xs`, {fontFamily: Fonts.regular}]}>
-            Dalam kurun waktu
-          </Text>
-          <View style={tw`py-1`} />
-          <View style={tw`flex-row justify-start`}>
-            <Dropdown
-              data={data}
-              placeholderStyle={[tw`text-sm`, {fontFamily: Fonts.regular}]}
-              selectedTextStyle={[tw`text-sm`, {fontFamily: Fonts.regular}]}
-              labelField="label"
-              valueField="value"
-              placeholder={data[0].label}
-              value={value}
-              onFocus={() => setIsFocus(true)}
-              onBlur={() => setIsFocus(false)}
-              itemTextStyle={[tw`text-sm`, {fontFamily: Fonts.regular}]}
-              itemContainerStyle={[
-                tw`w-30 rounded-lg shadow-md`,
-                {backgroundColor: colors.white},
-              ]}
-              containerStyle={[
-                tw`w-30 rounded-lg shadow-md`,
-                {backgroundColor: colors.white},
-              ]}
+          <View
+            style={tw`flex-row items-center justify-between pt-4 w-full px-5`}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
               style={[
-                tw`h-10 rounded-lg px-3 w-30 shadow-md`,
-                {backgroundColor: colors.white},
-              ]}
-              onChange={item => {
-                setValue(item.value);
-                setIsFocus(false);
-              }}
+                tw`px-2.2 py-2 rounded-full`,
+                {backgroundColor: colors.primary},
+              ]}>
+              <CrossIcon width={20} height={20} />
+            </TouchableOpacity>
+            <Text style={[tw`text-lg`, {fontFamily: Fonts.semiBold}]}>
+              Create Post
+            </Text>
+            <TouchableOpacity
+              onPress={handleCreatePost}
+              style={[
+                tw`px-2.2 py-2 rounded-full`,
+                {backgroundColor: colors.primary},
+              ]}>
+              <SendIconWhite width={20} height={20} />
+            </TouchableOpacity>
+          </View>
+          <View style={tw`py-2`} />
+          <View
+            style={[
+              tw`flex-1 w-full h-full rounded-tl-3xl rounded-tr-3xl px-5`,
+              {backgroundColor: colors.secondary},
+            ]}>
+            <View style={tw`py-2`} />
+            <Text style={[tw`text-center`, {fontFamily: Fonts.semiBold}]}>
+              Show your screen time!
+            </Text>
+            <View style={tw`py-4`} />
+            <CreatePostForm
+              value={value}
+              isFocus={isFocus}
+              hours={hours}
+              minutes={minutes}
+              caption={caption}
+              setValue={setValue}
+              setIsFocus={setIsFocus}
+              setHours={setHours}
+              setMinutes={setMinutes}
+              setCaption={setCaption}
             />
           </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
+      {isLoadingPost && <CustomLoading />}
     </Modal>
   );
 };
 
 export default CreatePostScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  dropdown: {
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 0.5,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-});

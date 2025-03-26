@@ -7,6 +7,10 @@ import HeartIcon from './HeartIcon';
 import SendIcon from './SendIcon';
 import HeartIconRed from './HeartIconRed';
 import CrossIcon from './CrossIcon';
+import SendIconWhite from './SendIconWhite';
+import PlusIconWhite from './PlusIconWhite';
+import CameraIcon from './CameraIcon';
+import CameraIconWhite from './CameraIconWhite';
 
 export {
   PersonIcon,
@@ -18,4 +22,8 @@ export {
   SendIcon,
   HeartIconRed,
   CrossIcon,
+  SendIconWhite,
+  PlusIconWhite,
+  CameraIcon,
+  CameraIconWhite,
 };
