@@ -34,7 +34,6 @@ const usePostStore = create<PostState>(set => ({
       });
       const uuid = await AsyncStorage.getItem('uuid');
       const url = uuid ? `/fetch-posts?uuid=${uuid}` : '/fetch-posts';
-
       const response = await api.get(url);
       set({posts: response.data.data});
     } catch (error: any) {
@@ -55,10 +54,8 @@ const usePostStore = create<PostState>(set => ({
         succMessage: null,
         error: false,
       });
-      const uuid = await AsyncStorage.getItem('uuid');
-      const url = uuid ? `/fetch-posts?uuid=${uuid}` : '/fetch-posts';
-      const response = await api.post(url, {...req});
-      set({posts: response.data.data, succMessage: response.data.message});
+      const response = await api.post('/create-post', {...req});
+      set({succMessage: response.data.message});
     } catch (error: any) {
       set({
         error: true,

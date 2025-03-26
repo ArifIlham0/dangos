@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import tw from 'twrnc';
 import {Fonts} from '../constants/font';
 import {Dropdown} from 'react-native-element-dropdown';
-import {dataPeriod} from '../constants/data';
+import {dataApp, dataPeriod} from '../constants/data';
 import {PlusIconWhite} from '../../assets/icons';
 import useColors from '../zustand/useColor';
 import AppComponent from './AppComponent';
@@ -21,30 +21,36 @@ type Props = {
   hours: string;
   minutes: string;
   caption: string;
+  apps: {name: string; duration: number}[];
   setValue: (value: string | null) => void;
   setIsFocus: (focus: boolean) => void;
   setHours: (hours: string) => void;
   setMinutes: (minutes: string) => void;
   setCaption: (caption: string) => void;
+  setApps: (apps: {name: string; duration: number}[]) => void;
 };
 
 const CreatePostForm = (props: Props) => {
+  const {apps, setApps} = props;
   const colors = useColors();
-  const [appComponents, setAppComponents] = useState([{}]);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const addAppComponent = () => {
-    setAppComponents(prev => [...prev, {}]);
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({animated: true});
-    }, 100);
+  useEffect(() => {
+    if (apps.length === 0) {
+      setApps([{name: dataApp[0].label, duration: 0}]);
+    }
+  }, [apps, setApps]);
+
+  const addApp = () => {
+    props.setApps([...props.apps, {name: dataApp[0].label, duration: 0}]);
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({animated: true}), 100);
   };
 
-  const removeAppComponent = () => {
-    if (appComponents.length === 1) {
+  const removeApp = (index: number) => {
+    if (props.apps.length === 1) {
       return;
     }
-    setAppComponents(prev => prev.slice(0, prev.length - 1));
+    props.setApps(props.apps.filter((_, i) => i !== index));
   };
 
   return (
@@ -102,13 +108,20 @@ const CreatePostForm = (props: Props) => {
         />
       </View>
       <View style={tw`py-4`} />
-      {appComponents.map((_, index) => (
-        <AppComponent key={index} {...props} />
+      {props.apps.map((item, index) => (
+        <AppComponent
+          key={index}
+          index={index}
+          app={item}
+          {...props}
+          setApps={props.setApps}
+          apps={props.apps}
+        />
       ))}
       <View style={tw`py-1`} />
       <View style={tw`flex-row justify-end py-4`}>
         <TouchableOpacity
-          onPress={removeAppComponent}
+          onPress={() => removeApp(props.apps.length - 1)}
           style={[
             tw`px-2.2 py-2 rounded-full w-10 h-10 items-center justify-center`,
             {backgroundColor: colors.primary},
@@ -117,7 +130,7 @@ const CreatePostForm = (props: Props) => {
         </TouchableOpacity>
         <View style={tw`px-2`} />
         <TouchableOpacity
-          onPress={addAppComponent}
+          onPress={addApp}
           style={[
             tw`px-2.2 py-2 rounded-full w-10 h-10 items-center justify-center`,
             {backgroundColor: colors.primary},

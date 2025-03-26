@@ -37,7 +37,7 @@ type Post = {
 type CreatePost = {
   user: string;
   caption: string;
-  apps: AppUsage[];
+  app: AppUsage[];
   is_week: boolean;
 };
 

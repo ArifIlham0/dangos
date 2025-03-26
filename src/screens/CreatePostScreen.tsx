@@ -5,8 +5,10 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '../constants/font';
 import tw from 'twrnc';
@@ -20,12 +22,49 @@ import useColors from '../zustand/useColor';
 const CreatePostScreen = () => {
   const navigation = useNavigation();
   const colors = useColors();
-  const {isLoadingPost, succMessage, errMessage, createPost} = usePostStore();
+  const {
+    isLoadingPost,
+    succMessage,
+    errMessage,
+    setErrMessage,
+    setSuccMessage,
+    createPost,
+    fetchPosts,
+  } = usePostStore();
   const [value, setValue] = useState<string | null>(null);
   const [isFocus, setIsFocus] = useState(false);
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [caption, setCaption] = useState('');
+  const [apps, setApps] = useState<{name: string; duration: number}[]>([]);
+
+  useEffect(() => {
+    if (errMessage) {
+      Alert.alert('Failed', errMessage, [
+        {
+          text: 'OK',
+          onPress: () => {
+            setErrMessage(null);
+          },
+        },
+      ]);
+    }
+  }, [errMessage, setErrMessage]);
+
+  useEffect(() => {
+    if (succMessage) {
+      fetchPosts();
+      Alert.alert('Success', succMessage, [
+        {
+          text: 'OK',
+          onPress: () => {
+            setSuccMessage(null);
+            navigation.goBack();
+          },
+        },
+      ]);
+    }
+  }, [succMessage, setSuccMessage, navigation, fetchPosts]);
 
   const handleCreatePost = async () => {
     const uuid = await AsyncStorage.getItem('uuid');
@@ -33,16 +72,19 @@ const CreatePostScreen = () => {
       Alert.alert('Failed', 'User ID is required');
       return;
     }
-    if (!hours || !minutes) {
+    const totalDuration = apps.reduce((sum, app) => sum + app.duration, 0);
+    if (totalDuration <= 0) {
       Alert.alert('Failed', 'Hours and minutes are required');
       return;
     }
-    await createPost({
+    const postData = {
       user: uuid,
       caption: caption,
-      is_week: value === 'week' ? true : false,
-      apps: [],
-    });
+      is_week: value === 'week',
+      app: apps,
+    };
+
+    await createPost(postData);
   };
 
   return (
@@ -52,7 +94,9 @@ const CreatePostScreen = () => {
       animationType="slide"
       presentationStyle="pageSheet">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
           style={[
             tw`flex-1 items-center`,
             {backgroundColor: colors.background},
@@ -96,14 +140,16 @@ const CreatePostScreen = () => {
               hours={hours}
               minutes={minutes}
               caption={caption}
+              apps={apps}
               setValue={setValue}
               setIsFocus={setIsFocus}
               setHours={setHours}
               setMinutes={setMinutes}
               setCaption={setCaption}
+              setApps={setApps}
             />
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
       {isLoadingPost && <CustomLoading />}
     </Modal>
