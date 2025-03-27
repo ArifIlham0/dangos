@@ -5,6 +5,9 @@ import NoDataComponent from './NoDataComponent';
 import CreatePostForm from './CreatePostForm';
 import UserCreateModal from './UserCreateModal';
 import AppComponent from './AppComponent';
+import MyPostComponent from './MyPostComponent';
+import HeaderDrawer from './HeaderDrawer';
+import HeaderButton from './HeaderButton';
 
 export {
   CustomFloatingButton,
@@ -14,4 +17,7 @@ export {
   CreatePostForm,
   UserCreateModal,
   AppComponent,
+  MyPostComponent,
+  HeaderDrawer,
+  HeaderButton,
 };

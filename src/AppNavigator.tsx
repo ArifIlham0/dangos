@@ -4,7 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BlurView} from '@react-native-community/blur';
 import tw from 'twrnc';
-import {CreatePostScreen, HomeScreen, MyPostScreen} from './screens';
+import {CreatePostScreen} from './screens';
 import {TabProps} from './types';
 import usePostStore from './zustand/postStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +14,7 @@ import useColors from './zustand/useColor';
 import {
   CustomFloatingButton,
   CustomLoading,
+  HeaderDrawer,
   UserCreateModal,
 } from './components';
 import {
@@ -25,6 +26,14 @@ import {
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const HomeHeader = () => {
+  return <HeaderDrawer isMyPost={false} />;
+};
+
+const MyPostHeader = () => {
+  return <HeaderDrawer isMyPost={true} />;
+};
 
 const HomeTabIcon = (props: TabProps) => (
   <View style={tw`items-center`}>
@@ -141,7 +150,7 @@ const BottomTabNavigator: React.FC = () => {
         }}>
         <Tab.Screen
           name="Home"
-          component={HomeScreen}
+          component={HomeHeader}
           options={{
             tabBarIcon: renderHomeTabIcon,
           }}
@@ -155,7 +164,7 @@ const BottomTabNavigator: React.FC = () => {
         />
         <Tab.Screen
           name="MyPost"
-          component={MyPostScreen}
+          component={MyPostHeader}
           options={{
             tabBarIcon: renderMyPostTabIcon,
           }}
