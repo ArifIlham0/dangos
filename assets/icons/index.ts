@@ -11,6 +11,7 @@ import SendIconWhite from './SendIconWhite';
 import PlusIconWhite from './PlusIconWhite';
 import CameraIcon from './CameraIcon';
 import CameraIconWhite from './CameraIconWhite';
+import GearIcon from './GearIcon';
 
 export {
   PersonIcon,
@@ -26,4 +27,5 @@ export {
   PlusIconWhite,
   CameraIcon,
   CameraIconWhite,
+  GearIcon,
 };
