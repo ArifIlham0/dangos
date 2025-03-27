@@ -11,7 +11,9 @@ type UserState = {
   setErrMessage: (newMessage: string | null) => void;
   error: boolean;
   users: User[];
+  user: User;
   createUser: (req: User) => Promise<void>;
+  fetchUser: () => Promise<void>;
 };
 
 const useUserStore = create<UserState>(set => ({
@@ -22,6 +24,7 @@ const useUserStore = create<UserState>(set => ({
   setSuccMessage: newMessage => set({succMessage: newMessage}),
   error: false,
   users: [],
+  user: {} as User,
 
   createUser: async (req: User) => {
     try {
@@ -34,6 +37,29 @@ const useUserStore = create<UserState>(set => ({
       const response = await api.post('/create-user', {...req});
       await AsyncStorage.setItem('uuid', response.data.data.uuid);
       set({users: response.data.data, succMessage: response.data.message});
+    } catch (error: any) {
+      set({
+        error: true,
+        errMessage: error.response?.data?.message,
+      });
+    } finally {
+      set({isLoadingUser: false});
+    }
+  },
+
+  fetchUser: async () => {
+    try {
+      set({
+        isLoadingUser: true,
+        succMessage: null,
+        errMessage: null,
+        error: false,
+      });
+      const uuid = await AsyncStorage.getItem('uuid');
+      console.log('url fetch user', `/fetch-user?uuid=${uuid}`);
+      const response = await api.get(`/fetch-user?uuid=${uuid}`);
+      console.log('berhasil fetch user', response.data.data);
+      set({user: response.data.data, succMessage: response.data.message});
     } catch (error: any) {
       set({
         error: true,

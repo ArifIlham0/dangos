@@ -1,9 +1,5 @@
 import {
   View,
-  Text,
-  Platform,
-  StatusBar,
-  TouchableOpacity,
   Dimensions,
   FlatList,
   RefreshControl,
@@ -11,15 +7,11 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import tw from 'twrnc';
-import {Fonts} from '../constants/font';
-import {PersonIcon} from '../../assets/icons';
 import usePostStore from '../zustand/postStore';
 import {NoDataComponent, PostComponent} from '../components';
 import useColors from '../zustand/useColor';
 
 const HomeScreen = () => {
-  const statusBarHeight =
-    Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 50;
   const colors = useColors();
   const {isLoadingPost, posts, fetchPosts} = usePostStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -38,19 +30,9 @@ const HomeScreen = () => {
     <View
       style={[
         tw`flex-1 items-center px-5`,
-        {paddingTop: statusBarHeight, backgroundColor: colors.background},
+        {backgroundColor: colors.background},
       ]}>
-      <View style={tw`flex-row items-center justify-between w-full`}>
-        <Text style={[tw`text-xl`, {fontFamily: Fonts.semiBold}]}>Explore</Text>
-        <TouchableOpacity
-          style={[
-            tw`py-2.5 px-3.2 rounded-full`,
-            {backgroundColor: colors.secondary},
-          ]}>
-          <PersonIcon />
-        </TouchableOpacity>
-      </View>
-      <View style={tw`py-1`} />
+      <View style={tw`py-1.5`} />
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -65,7 +47,7 @@ const HomeScreen = () => {
           overScrollMode="never"
           scrollEnabled={false}
           bounces={true}
-          contentContainerStyle={tw`pt-6 pb-30`}
+          contentContainerStyle={tw`pt-2 pb-30`}
           renderItem={({item, index}) => {
             const barWidth = 50;
             const chartWidth = Math.max(

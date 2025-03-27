@@ -77,6 +77,7 @@ const PostComponent = (props: Props) => {
             height={250}
             yAxisLabel={''}
             yAxisSuffix={''}
+            showValuesOnTopOfBars={true}
             fromZero={true}
             withInnerLines={false}
             chartConfig={{
