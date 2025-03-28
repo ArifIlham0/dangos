@@ -8,6 +8,7 @@ import AppComponent from './AppComponent';
 import MyPostComponent from './MyPostComponent';
 import HeaderDrawer from './HeaderDrawer';
 import HeaderButton from './HeaderButton';
+import CustomButton from './CustomButton';
 
 export {
   CustomFloatingButton,
@@ -20,4 +21,5 @@ export {
   MyPostComponent,
   HeaderDrawer,
   HeaderButton,
+  CustomButton,
 };

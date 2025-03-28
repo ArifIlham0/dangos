@@ -6,9 +6,8 @@ import {BlurView} from '@react-native-community/blur';
 import tw from 'twrnc';
 import {CreatePostScreen} from './screens';
 import {TabProps} from './types';
-import usePostStore from './zustand/postStore';
+import {usePostStore, useUserStore} from './zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import useUserStore from './zustand/userStore';
 import {HomeIcon, PlusIcon, PostIcon} from '../assets/icons';
 import useColors from './zustand/useColor';
 import {
@@ -130,7 +129,7 @@ const BottomTabNavigator: React.FC = () => {
   );
 
   return (
-    <View style={tw`flex-1`}>
+    <View style={[tw`flex-1`]}>
       <Tab.Navigator
         screenOptions={{
           tabBarActiveTintColor: colors.white,

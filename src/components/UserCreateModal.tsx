@@ -9,7 +9,6 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
@@ -18,10 +17,11 @@ import {CameraIcon, CameraIconWhite} from '../../assets/icons';
 import {Fonts} from '../constants/font';
 import useUserStore from '../zustand/userStore';
 import uuid from 'react-native-uuid';
-import ImagePicker from 'react-native-image-crop-picker';
 import CustomLoading from './CustomLoading';
 import useColors from '../zustand/useColor';
 import useThemeStore from '../zustand/themeStore';
+import CustomButton from './CustomButton';
+import {openGallery} from '../utils/function';
 
 type Props = {
   isModalVisible: boolean;
@@ -72,19 +72,6 @@ const UserCreateModal = (props: Props) => {
       ]);
     }
   }, [succMessage, setSuccMessage, setModalVisible]);
-
-  const openGallery = async () => {
-    const result = await ImagePicker.openPicker({
-      mediaType: 'photo',
-      cropping: true,
-      width: 300,
-      height: 300,
-    });
-
-    if (result && result.path) {
-      setImageUrl(result.path);
-    }
-  };
 
   const handleClose = () => {
     setName('');
@@ -138,7 +125,7 @@ const UserCreateModal = (props: Props) => {
                   {backgroundColor: colors.background},
                 ]}>
                 <TouchableOpacity
-                  onPress={openGallery}
+                  onPress={() => openGallery({setImageUrl})}
                   style={[
                     tw`absolute -top-13 p-2 rounded-full items-center`,
                     {backgroundColor: colors.background},
@@ -198,25 +185,11 @@ const UserCreateModal = (props: Props) => {
                   ) : null}
                 </View>
                 <View style={tw`py-5`} />
-                <TouchableOpacity
-                  disabled={!name}
+                <CustomButton
+                  disabled={name}
+                  text="Confirm"
                   onPress={handleCreateUser}
-                  style={[
-                    tw`py-3 px-8 rounded-3xl`,
-                    styles.shadow,
-                    {
-                      backgroundColor: name ? colors.primary : colors.bgModal,
-                      shadowColor: colors.primary,
-                    },
-                  ]}>
-                  <Text
-                    style={[
-                      tw`text-center text-xs`,
-                      {color: colors.white, fontFamily: Fonts.regular},
-                    ]}>
-                    Confirm
-                  </Text>
-                </TouchableOpacity>
+                />
                 <View style={tw`py-3`} />
               </View>
             </View>
@@ -229,12 +202,3 @@ const UserCreateModal = (props: Props) => {
 };
 
 export default UserCreateModal;
-
-export const styles = StyleSheet.create({
-  shadow: {
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-});
